@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<meta charset='utf-8'>
+<html>
+  <head>
+    <script>
+      var number;
+      var messageBox;
+      var gameWon;
+      var guessesRemaining = 10;
+      var guessesMade = 0;
+      var gameState = '';
+      var button;
+      pickNumber();
+
+      function pickNumber() {
+        number = Math.round(Math.random() * 100);
+        console.log(number);
+      }
+
+      window.onload = () => {
+        messageBox = document.getElementById('message');
+        button = document.getElementById('inputButton');
+        button.addEventListener('click', clickHandler, 'false');
+        window.addEventListener('keydown', keyDownHandler, false);
+      };
+
+      function keyDownHandler(event) {
+        if (event.keyCode === 13) {
+          run();
+        }
+      }
+
+      function clickHandler() {
+        run();
+      }
+
+      function run() {
+        var guess = parseInt(document.getElementById('numberInput').value);
+        if (!isInputValid(guess)) {
+          messageBox.innerHTML = 'Please enter a whole number.';
+          return;
+        }
+        playGame(guess);
+      }
+
+      function isInputValid(guess) {
+        return !isNaN(guess);
+      }
+
+      function playGame(guess) {
+        guessesRemaining--;
+        guessesMade++;
+        gameState =
+          ' Guess: ' + guessesMade + ', Remaining: ' + guessesRemaining;
+
+        if (+guess === number) {
+          messageBox.innerHTML =
+            'You guessed it! The number was ' + number + '.';
+          gameWon = true;
+          endGame(guessesMade, guess);
+        } else if (guess < number) {
+          messageBox.innerHTML = "That's too low." + gameState;
+          if (guessesRemaining === 0) {
+            endGame(guessesMade, guess);
+          }
+        } else if (guess > number) {
+          messageBox.innerHTML = "That's too high." + gameState;
+          if (guessesRemaining === 0) {
+            endGame(guessesMade, guess);
+          }
+        }
+      }
+
+      function endGame(guessesMade, guess) {
+        if (gameWon) {
+          messageBox.innerHTML =
+            'Congratulations! You won the game! It only took you ' +
+            guessesMade +
+            ' guesses.';
+        } else {
+          messageBox.innerHTML = 'You lost! The number was ' + number + '.';
+        }
+
+        // Disable the button
+        button.removeEventListener('click', clickHandler, false);
+        button.disabled = true;
+
+        // Disable the enter key
+        window.removeEventListener('keydown', keyDownHandler, false);
+      }
+    </script>
+  </head>
+
+  <body>
+    <div id="message">
+      I'm thinking of a number between 0 and 99, inclusive.
+    </div>
+    <br />
+    <div>
+      <input type="text" id="numberInput" autofocus />
+      <input type="button" id="inputButton" value="Guess" />
+    </div>
+    <br />
+    <div id="output"></div>
+  </body>
+</html>
