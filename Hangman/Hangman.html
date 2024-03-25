@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<head>
+  <style>
+    #stage {
+      width: 60%;
+      margin: auto;
+      border: 2px solid black;
+      text-align: center;
+    }
+
+    #letters {
+      display: flex;
+      margin: 20px 10px;
+      text-align: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    #blanks {
+      margin: 40px 5px 40px 10px;
+      display: flex;
+      text-align: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .word {
+      display: flex;
+      margin-right: 15px;
+      margin-bottom: 8px;
+    }
+    
+    .blank {
+      margin-right: 5px;
+      padding: 2px 5px;
+      height: 18px;
+      width: 12px;
+      border-bottom: 1px solid black;
+    }
+
+    .space {
+      margin-right: 5px;
+      padding: 2px 5px;
+      height: 18px;
+      width: 12px;
+    }
+
+    .letter {
+      margin: 5px 5px;
+      border: 1px solid black;
+      padding: 2px 5px;
+      height: 18px;
+      width: 12px;
+    }
+
+    .letter-unselected {
+      cursor: pointer;
+    }
+
+    .letter-selected {
+      background: lightgray;
+    }
+
+  </style>
+  <script>
+    var phrases = [
+      "MISERY LOVES COMPANY",
+      "FLY IN THE OINTMENT",
+      "RAINING CATS AND DOGS",
+      "ANTS IN YOUR PANTS",
+      "BEHIND THE EIGHT BALL",
+      "BY THE SKIN OF YOUR TEETH",
+      "NO SKIN OFF MY NOSE",
+      "JUMP ON THE BANDWAGON",
+      "MY KINGDOM FOR A HORSE"
+    ];
+
+    var alphabet = [
+      'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+      'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+      'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+      'Y', 'Z'
+    ];
+
+    var selectedLetters = [];
+    var startButton;
+    var letterDisplay;
+    var blanksDisplay;
+    var infoDisplay;
+    var phrase;
+    var state;
+    var guessesMade = 0;
+    var guessesRemaining = 6;
+
+    function reset() {
+      selectedLetters = [];
+      guessesMade = 0;
+      guessesRemaining = 6;
+      state = `Guesses made: ${guessesMade} Guesses Remaining: ${guessesRemaining}`;
+      stateDisplay.innerHTML = state;
+
+      var letters = document.querySelectorAll(".letter");
+      letters.forEach(letter => {
+        letter.classList.remove("letter-selected");
+        letter.classList.add("letter-unselected");
+      });
+
+      var phraseIdx = Math.floor(Math.random() * phrases.length);
+      phrase = phrases[phraseIdx];
+      console.log(phrase);
+      renderPuzzle();
+    }
+
+    function renderLetters() {
+      // Display the letters
+      var letterBlocks = "";
+      alphabet.forEach((letter, index) =>
+        letterBlocks += 
+          `<div id="letter-${letter}" onclick="onLetterClick('${letter}')" class="letter letter-unselected">${letter}</div>`);
+      
+      letterDisplay.innerHTML = letterBlocks;
+    }
+
+    function renderPuzzle() {
+      var content = "";
+      var words = phrase.split(' ');
+      words.forEach(word => {
+        content += `<div class="word">${renderWord(word)}</div>`;
+      });
+
+      blanksDisplay.innerHTML = content;
+    }
+
+    function renderWord(word) {
+      var wordContent = "";
+      var wordChars = Array.from(word);
+      wordChars.forEach(char => wordContent += renderBlankOrLetter(char));
+
+      return wordContent;
+    }
+
+    function renderBlankOrLetter(char) {
+      return selectedLetters.includes(char) ? 
+      `<div class="blank">${char}</div>` : `<div class="blank"> </div>`;
+    }
+
+    function onLetterClick(letter) {
+      if (selectedLetters.includes(letter)) {
+        return;
+      }
+
+      var letterDiv = document.querySelector(`#letter-${letter}`);
+      selectedLetters.push(letter);
+      letterDiv.classList.remove("letter-unselected");
+      letterDiv.classList.add("letter-selected");
+
+      guessesMade++;
+      guessesRemaining--;
+      state = `Guesses made: ${guessesMade} Guesses Remaining: ${guessesRemaining}`;
+      stateDisplay.innerHTML = state;
+
+      if (guessesRemaining <= 0) {
+        alert("Game Over");
+        return;
+      }
+
+      renderPuzzle();
+    }
+
+    window.onload = () => {
+      startButton = document.querySelector("#startButton");
+      letterDisplay = document.querySelector("#letters");
+      blanksDisplay = document.querySelector("#blanks");
+      stateDisplay = document.querySelector("#state");
+      startButton.addEventListener("click", onReset, false);
+      renderLetters();
+      reset();
+
+      function onReset() {
+        reset();
+      }
+    };
+  </script>
+</head>
+
+<body>
+  <div id="stage">
+    <div id="blanks">
+    </div>
+
+    <div id="info">
+      <p id="state">
+
+      </p>
+      <button id="startButton">Reset</button>
+    </div>
+
+    <div id="letters">
+    </div>
+  </div>
+</body>
