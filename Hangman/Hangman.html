@@ -4,8 +4,10 @@
     #stage {
       width: 60%;
       margin: auto;
-      border: 2px solid black;
+      border: 5px solid hotpink;
       text-align: center;
+      border-radius: 20px;
+      background-color: #f9f8b1;
     }
 
     #letters {
@@ -17,17 +19,48 @@
     }
 
     #blanks {
-      margin: 40px 5px 40px 10px;
+      margin: 40px 10px;
       display: flex;
       text-align: center;
       flex-wrap: wrap;
       justify-content: center;
+      background: white;
+      border: 2px solid hotpink;
+      border-radius: 8px;
+      padding: 14px 0;
+    }
+
+    #state {
+      font-family: sans-serif;
+      font-weight: bold;
+      color: #f904a0;
+    }
+
+    #answerInput {
+      padding: 10px;
+      border: 2px solid hotpink;
+      border-radius: 6px;
+      display: block;
+      margin: auto;
+      margin-bottom: 10px;
+      width: 65%;
+      color: #f904a0;
+      font-weight: bold;
+    }
+
+    .button {
+      background: #f904a0;
+      padding: 5px 10px;
+      border: 2px solid #f904a0;
+      border-radius: 16px;
+      font-family: sans-serif;
+      color: white;
+      font-weight: bold;
     }
 
     .word {
       display: flex;
-      margin-right: 15px;
-      margin-bottom: 8px;
+      margin: 0 7px 8px 7px;
     }
     
     .blank {
@@ -35,7 +68,10 @@
       padding: 2px 5px;
       height: 18px;
       width: 12px;
-      border-bottom: 1px solid black;
+      border-bottom: 2px solid hotpink;
+      font-family: sans-serif;
+      color: hotpink;
+      font-weight: bold;
     }
 
     .space {
@@ -47,10 +83,15 @@
 
     .letter {
       margin: 5px 5px;
-      border: 1px solid black;
-      padding: 2px 5px;
-      height: 18px;
-      width: 12px;
+      border: 2px solid hotpink;
+      padding: 7px 5px 0px 5px;
+      height: 26px;
+      width: 24px;
+      border-radius: 18px;
+      background: white;
+      font-family: sans-serif;
+      color: #f43da2;
+      font-weight: bold;
     }
 
     .letter-unselected {
@@ -58,7 +99,7 @@
     }
 
     .letter-selected {
-      background: lightgray;
+      background: #fcd4d9;
     }
 
   </style>
@@ -84,16 +125,21 @@
 
     var selectedLetters = [];
     var startButton;
+    var submitButton;
     var letterDisplay;
     var blanksDisplay;
     var infoDisplay;
+    var answerInput;
     var phrase;
     var state;
     var guessesMade = 0;
     var guessesRemaining = 6;
+    var gameOver;
 
     function reset() {
       selectedLetters = [];
+      answerInput.value = "";
+      gameOver = false;
       guessesMade = 0;
       guessesRemaining = 6;
       state = `Guesses made: ${guessesMade} Guesses Remaining: ${guessesRemaining}`;
@@ -107,7 +153,6 @@
 
       var phraseIdx = Math.floor(Math.random() * phrases.length);
       phrase = phrases[phraseIdx];
-      console.log(phrase);
       renderPuzzle();
     }
 
@@ -121,31 +166,31 @@
       letterDisplay.innerHTML = letterBlocks;
     }
 
-    function renderPuzzle() {
+    function renderPuzzle(showAll) {
       var content = "";
       var words = phrase.split(' ');
       words.forEach(word => {
-        content += `<div class="word">${renderWord(word)}</div>`;
+        content += `<div class="word">${renderWord(word, showAll)}</div>`;
       });
 
       blanksDisplay.innerHTML = content;
     }
 
-    function renderWord(word) {
+    function renderWord(word, showAll) {
       var wordContent = "";
       var wordChars = Array.from(word);
-      wordChars.forEach(char => wordContent += renderBlankOrLetter(char));
+      wordChars.forEach(char => wordContent += renderBlankOrLetter(char, showAll));
 
       return wordContent;
     }
 
-    function renderBlankOrLetter(char) {
-      return selectedLetters.includes(char) ? 
+    function renderBlankOrLetter(char, showAll) {
+      return (selectedLetters.includes(char) || showAll) ? 
       `<div class="blank">${char}</div>` : `<div class="blank"> </div>`;
     }
 
     function onLetterClick(letter) {
-      if (selectedLetters.includes(letter)) {
+      if (selectedLetters.includes(letter) || gameOver) {
         return;
       }
 
@@ -154,31 +199,57 @@
       letterDiv.classList.remove("letter-unselected");
       letterDiv.classList.add("letter-selected");
 
-      guessesMade++;
-      guessesRemaining--;
-      state = `Guesses made: ${guessesMade} Guesses Remaining: ${guessesRemaining}`;
-      stateDisplay.innerHTML = state;
+      if (phrase.indexOf(letter) === -1) {
+        guessesMade++;
+        guessesRemaining--;
+        state = `Guesses made: ${guessesMade} Guesses Remaining: ${guessesRemaining}`;
+        stateDisplay.innerHTML = state;
+      }
 
       if (guessesRemaining <= 0) {
-        alert("Game Over");
+        gameOver = true;
+        renderPuzzle(true);
+        stateDisplay.innerHTML = "Game Over! You ran out of guesses";
         return;
       }
 
       renderPuzzle();
     }
 
+    function checkForWin() {
+      var answer = answerInput.value.trim();
+      if (phrases.includes(answer.toUpperCase())) {
+        stateDisplay.innerHTML = "Congratulations! You won the game!"
+      }
+      else {
+        stateDisplay.innerHTML = `Game Over! Your guess: ${answer}, was incorrect`;
+      }
+
+      gameOver = true;
+      renderPuzzle(true);
+    }
+
+    function onReset() {
+        reset();
+    }
+
     window.onload = () => {
       startButton = document.querySelector("#startButton");
+      submitButton = document.querySelector("#submitButton");
       letterDisplay = document.querySelector("#letters");
       blanksDisplay = document.querySelector("#blanks");
       stateDisplay = document.querySelector("#state");
+      answerInput = document.querySelector("#answerInput");
       startButton.addEventListener("click", onReset, false);
+      submitButton.addEventListener("click", checkForWin, false);
+      answerInput.addEventListener("keypress", function (event) {
+        if (event.keyCode === 13) {
+          checkForWin();
+        }
+      }, false);
+
       renderLetters();
       reset();
-
-      function onReset() {
-        reset();
-      }
     };
   </script>
 </head>
@@ -190,9 +261,10 @@
 
     <div id="info">
       <p id="state">
-
       </p>
-      <button id="startButton">Reset</button>
+      <input type="text" id="answerInput" />
+      <button id="submitButton" class="button">Guess!</button>
+      <button id="startButton" class="button">Reset</button>
     </div>
 
     <div id="letters">
