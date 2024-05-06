@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<title>The Forest Of Lyrica</title>
+<html>
+<head>
+  <script>
+    var map = [];
+    var images = [];
+    var blockedPathMessages = [];
+    var output;
+    var gameMessage = "";
+    var image;
+    var northButton;
+    var westButton;
+    var eastButton;
+    var southButton;
+    
+    map[0] = "An old stone keep.";
+    map[1] = "A deep well.";
+    map[2] = "A sunny glade.";
+    map[3] = "A sleeping dragon.";
+    map[4] = "A narrow pathway.";
+    map[5] = "An ancient gate.";
+    map[6] = "The edge of a river.";
+    map[7] = "A lonely wooden bench.";
+    map[8] = "A isolated cottage. Faint music comes from inside.";
+
+    images[0] = "keep.jpg"; 
+    images[1] = "well.jpg";
+    images[2] = "glade.jpg";
+    images[3] = "dragon.jpg";
+    images[4] = "path.jpg";
+    images[5] = "gate.jpg";
+    images[6] = "river.jpg";
+    images[7] = "bench.jpg";
+    images[8] = "cottage.jpg";
+
+    blockedPathMessages[0] = "It's too dangerous to move that way";
+    blockedPathMessages[1] = "A myterious force holds you back";
+    blockedPathMessages[2] = "A tangle of thorns blocks your way";
+    blockedPathMessages[3] = "You can't step over the dragon";
+    blockedPathMessages[4] = "";
+    blockedPathMessages[5] = "The gate locks shut";
+    blockedPathMessages[6] = "The river is too deep to cross";
+    blockedPathMessages[7] = "The trees are too thick to pass";
+    blockedPathMessages[8] = "You're too scared to go that way";
+
+    var mapLocation = 4;
+    
+    function playGame(action) {
+      gameMessage = "Click a direction to move about the map.";
+      if (action) {
+        movePlayer(action);
+      }
+      render();
+    }
+
+    function render() {
+      output.innerHTML = map[mapLocation];
+      image.src = "images/" + images[mapLocation];
+      output.innerHTML += "<br /><em>" + gameMessage + "</em><br />";
+    }
+
+    function movePlayer(action) {
+      switch(action) {
+        case "north":
+          mapLocation >= 3 ? 
+            mapLocation -= 3 : 
+            gameMessage = blockedPathMessages[mapLocation];
+          break;
+        case "west":
+          mapLocation % 3 != 0 ?
+            mapLocation -= 1 :
+            gameMessage = blockedPathMessages[mapLocation];
+          break;
+        case "east":
+          mapLocation % 3 != 2 ?
+            mapLocation += 1 :
+            gameMessage = blockedPathMessages[mapLocation];
+          break;
+        case "south":
+          mapLocation <= 5 ?
+            mapLocation += 3 :
+            gameMessage = blockedPathMessages[mapLocation];
+          break;
+        default:
+          gameMessage = "Could not parse player action.";
+      }
+
+      render();
+    };
+
+    window.onload = () => {
+      output = document.querySelector("#output");
+      northButton = document.querySelector("#north");
+      westButton = document.querySelector("#west");
+      eastButton = document.querySelector("#east");
+      southButton = document.querySelector("#south");
+      image = document.querySelector("img");
+
+      northButton.addEventListener("click", () => playGame("north"), false);
+      westButton.addEventListener("click", () => playGame("west"), false);
+      eastButton.addEventListener("click", () => playGame("east"), false);
+      southButton.addEventListener("click", () => playGame("south"), false);
+
+      playGame();
+    };
+  </script>
+</head>
+<body>
+<div>
+  <img src="" width="300" height="267" />
+</div>
+<p id="output"></p>
+<div>
+  <div><button id="north">North</button></div>
+  <div><button id="west">West</button><button id="east">East</button></div>
+  <div><button id="south">South</button></div>
+</div>
+</body>
+</html>
