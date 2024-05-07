@@ -6,6 +6,10 @@
     var map = [];
     var images = [];
     var blockedPathMessages = [];
+    var items = ["flute", "stone", "sword"];
+    var itemLocations = [1, 6, 8];
+    var backpack = [];
+    var availableItem;
     var output;
     var gameMessage = "";
     var image;
@@ -13,16 +17,22 @@
     var westButton;
     var eastButton;
     var southButton;
+    var takeFlute;
+    var dropFlute;
+    var takeStone;
+    var dropStone;
+    var takeSword;
+    var dropSword;
     
-    map[0] = "An old stone keep.";
-    map[1] = "A deep well.";
-    map[2] = "A sunny glade.";
-    map[3] = "A sleeping dragon.";
-    map[4] = "A narrow pathway.";
-    map[5] = "An ancient gate.";
-    map[6] = "The edge of a river.";
-    map[7] = "A lonely wooden bench.";
-    map[8] = "A isolated cottage. Faint music comes from inside.";
+    map[0] = "An old stone keep. ";
+    map[1] = "A deep well. ";
+    map[2] = "A sunny glade. ";
+    map[3] = "A sleeping dragon. ";
+    map[4] = "A narrow pathway. ";
+    map[5] = "An ancient gate. ";
+    map[6] = "The edge of a river. ";
+    map[7] = "A lonely wooden bench. ";
+    map[8] = "A isolated cottage. Faint music comes from inside. ";
 
     images[0] = "keep.jpg"; 
     images[1] = "well.jpg";
@@ -34,22 +44,22 @@
     images[7] = "bench.jpg";
     images[8] = "cottage.jpg";
 
-    blockedPathMessages[0] = "It's too dangerous to move that way";
-    blockedPathMessages[1] = "A myterious force holds you back";
-    blockedPathMessages[2] = "A tangle of thorns blocks your way";
-    blockedPathMessages[3] = "You can't step over the dragon";
+    blockedPathMessages[0] = "It's too dangerous to move that way. ";
+    blockedPathMessages[1] = "A myterious force holds you back. ";
+    blockedPathMessages[2] = "A tangle of thorns blocks your way. ";
+    blockedPathMessages[3] = "You can't step over the dragon. ";
     blockedPathMessages[4] = "";
-    blockedPathMessages[5] = "The gate locks shut";
-    blockedPathMessages[6] = "The river is too deep to cross";
-    blockedPathMessages[7] = "The trees are too thick to pass";
-    blockedPathMessages[8] = "You're too scared to go that way";
+    blockedPathMessages[5] = "The gate locks shut. ";
+    blockedPathMessages[6] = "The river is too deep to cross. ";
+    blockedPathMessages[7] = "The trees are too thick to pass. ";
+    blockedPathMessages[8] = "You're too scared to go that way. ";
 
     var mapLocation = 4;
     
     function playGame(action) {
-      gameMessage = "Click a direction to move about the map.";
+      gameMessage = "Click a direction to move about the map.<br />";
       if (action) {
-        movePlayer(action);
+        takeAction(action);
       }
       render();
     }
@@ -57,11 +67,49 @@
     function render() {
       output.innerHTML = map[mapLocation];
       image.src = "images/" + images[mapLocation];
-      output.innerHTML += "<br /><em>" + gameMessage + "</em><br />";
+      items.forEach((item, idx) => {
+        if (itemLocations[idx] === mapLocation) {
+          output.innerHTML += `You see a <strong>${items[idx]}</strong> here.<br />`;
+        }
+      });
+
+      output.innerHTML += "<br /><em>" + gameMessage + "</em>";
+
+      if (backpack.length !== 0) {
+        output.innerHTML += `You are carrying: ${backpack.join(", ")}<br />`;
+      }
     }
 
-    function movePlayer(action) {
-      switch(action) {
+    function takeItem(item) {
+      var itemIdx = items.indexOf(item);
+
+      if (itemIdx != -1 && itemLocations[itemIdx] === mapLocation) {
+        gameMessage = `You take the ${item}.` + "<br />";
+        backpack.push(item);
+        items.splice(itemIdx, 1);
+        itemLocations.splice(itemIdx, 1);
+      }
+      else {
+        gameMessage = "You can't do that.<br />";
+      }
+    };
+
+    function dropItem(item) {
+      var backpackIdx = backpack.indexOf(item);
+
+      if (backpackIdx != -1) {
+        gameMessage = `You drop the ${item}.` + "<br />";
+        items.push(item);
+        itemLocations.push(mapLocation);
+        backpack.splice(backpackIdx, 1);
+      }
+      else {
+        gameMessage = "You can't do that.<br />";
+      }
+    };
+
+    function takeAction(action) {
+      switch(action.action) {
         case "north":
           mapLocation >= 3 ? 
             mapLocation -= 3 : 
@@ -82,6 +130,12 @@
             mapLocation += 3 :
             gameMessage = blockedPathMessages[mapLocation];
           break;
+        case "take":
+          takeItem(action.item);
+          break;
+        case "drop":
+          dropItem(action.item);
+          break;
         default:
           gameMessage = "Could not parse player action.";
       }
@@ -95,12 +149,24 @@
       westButton = document.querySelector("#west");
       eastButton = document.querySelector("#east");
       southButton = document.querySelector("#south");
+      takeFlute = document.querySelector("#takeFlute");
+      dropFlute = document.querySelector("#dropFlute");
+      takeStone = document.querySelector("#takeStone");
+      dropStone = document.querySelector("#dropStone");
+      takeSword = document.querySelector("#takeSword");
+      dropSword = document.querySelector("#dropSword");
       image = document.querySelector("img");
 
-      northButton.addEventListener("click", () => playGame("north"), false);
-      westButton.addEventListener("click", () => playGame("west"), false);
-      eastButton.addEventListener("click", () => playGame("east"), false);
-      southButton.addEventListener("click", () => playGame("south"), false);
+      northButton.addEventListener("click", () => playGame({ action: "north" }), false);
+      westButton.addEventListener("click", () => playGame({ action: "west" }), false);
+      eastButton.addEventListener("click", () => playGame({ action: "east" }), false);
+      southButton.addEventListener("click", () => playGame({ action: "south" }), false);
+      takeFlute.addEventListener("click", () => playGame({ action: "take", item: "flute" }), false);
+      dropFlute.addEventListener("click", () => playGame({ action: "drop", item: "flute" }), false);
+      takeStone.addEventListener("click", () => playGame({ action: "take", item: "stone" }), false);
+      dropStone.addEventListener("click", () => playGame({ action: "drop", item: "stone" }), false);
+      takeSword.addEventListener("click", () => playGame({ action: "take", item: "sword" }), false);
+      dropSword.addEventListener("click", () => playGame({ action: "drop", item: "sword" }), false);
 
       playGame();
     };
@@ -115,6 +181,12 @@
   <div><button id="north">North</button></div>
   <div><button id="west">West</button><button id="east">East</button></div>
   <div><button id="south">South</button></div>
+  <div><button id="takeFlute">Take Flute</button></div>
+  <div><button id="dropFlute">Drop Flute</button></div>
+  <div><button id="takeStone">Take Stone</button></div>
+  <div><button id="dropStone">Drop Stone</button></div>
+  <div><button id="takeSword">Take Sword</button></div>
+  <div><button id="dropSword">Drop Sword</button></div>
 </div>
 </body>
 </html>
